@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const config = require('../config/serverConfig');
 
 const testBot  = require('../controllers/handler');
 const testDetailsFilePath = path.join(__dirname, '../', '/testcases', '/testdetails.json');
@@ -81,7 +82,7 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
         }
 
         const headers = {
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjcy1iNGY0NDc2ZC1jMDA2LTVmZmYtOTRjMS05ZTM0ZDMyMjU2OTEifQ.Ira2wrL4gK8xGHpiIw7JuEOX7cXndVo6LeLSjvfTRqg",
+            "Authorization": config.TOKEN,
             "Content-Type": "application/json",
         };
 
@@ -125,7 +126,7 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
 
         const callbackId = `callback_${botId}_${channel}`;
         const headers = {
-            "xo-api-key": "yktyderjdzfwhhM3wQkjhsfiaHqSBxTpc4XXOP7v/rHdPYfD6qA9Zc=",
+            "xo-api-key": config.XO_API_KEY,
             "Content-Type": "application/json",
             "callbackUrl": `https://1cc3-115-114-88-222.ngrok-free.app/callback/${callbackId}`
         };

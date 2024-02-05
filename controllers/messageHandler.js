@@ -1,11 +1,12 @@
 const axios = require('axios');
+const config = require('../config/serverConfig');
 
 const sendMessageToXO = async function (messageReceived, botId, mssgType, channel) {
     if (channel === 'webhook') {
         console.log('Received message:', messageReceived);
         //console.log('Received Obj:', JSON.parse(message));
         const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
-        //const apiUrl = 'https://bots.kore.ai/chatbot/v2/webhook/st-a682a091-119e-50cc-9d67-c9972a86b401';
+       
 
         let reqObj;
         console.log('This is client req webhook ---------->');
@@ -30,7 +31,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
         }
 
         const headers = {
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjcy0yZTg4ZWE4OC02ODI3LTU5MjEtYmY4My03NzI4OTVhOWY2MzAifQ.CvLMx4VrzUeOzrjODvaKs5IvH3XptEE1CLwG-k5RcqE",
+            "Authorization": config.TOKEN,
             "Content-Type": "application/json",
         };
 
@@ -68,8 +69,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
     }
     else if (channel === 'amfb') {
         console.log('Received message:', messageReceived);
-        //console.log('Received Obj:', JSON.parse(message));
-        //const apiUrl = 'https://bots.kore.ai/chatbot/v2/webhook/st-a682a091-119e-50cc-9d67-c9972a86b401';
+    
         const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
 
         let reqObj;
@@ -98,7 +98,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
 
         const callbackId = `callback_${botId}_${channel}`;
         const headers = {
-            "xo-api-key": "yktyderjdzfwhhM3wQkjhsfiaHqSBxTpc4XXOP7v/rHdPYfD6qA9Zc=",
+            "xo-api-key": config.XO_API_KEY,
             "Content-Type": "application/json",
             "callbackUrl": `https://1cc3-115-114-88-222.ngrok-free.app/callback/${callbackId}`
         };
@@ -118,19 +118,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
             else {
                 responseToSend = responseFromBot;
             }
-            // console.log('response to send', responseToSend);
-            // console.log(responseToSend);
-            // //ws.send(JSON.stringify({'val': ''}));
-            // let expectedResponseAMFB = {
-            //     'id': '',
-            //     'sourceId': '',
-            //     'destinationId': '',
-            //     'type': '',
-            //     'v': '',
-            //     'body': ''
-
-            // };
-
+            
 
             if (responseToSend) {
                 //ws.send(JSON.stringify(responseToSend[0]));
