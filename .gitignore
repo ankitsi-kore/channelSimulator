@@ -1,0 +1,4 @@
+/node_modules
+/testcases
+test_results.txt
+.env

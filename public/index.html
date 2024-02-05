@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Simulator</title>
+</head>
+<link rel="icon" href="https://kore.ai/wp-content/uploads/2022/03/Kore.ai_favicon.svg">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10"> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin></script>
+
+<body>
+
+    <div class="header">
+        <img src="https://bots.kore.ai/botbuilder/assets/landingImages/kore-logo.svg" alt="kore-logo" id="kore-logo">
+    </div>
+    <div class="btn-container">
+        <button type="button" class="btn btn-primary" onclick="displayThreadPopup()">Create Thread</button>
+        <button type="button" class="btn btn-primary" onclick="displayChannelPopup()">Add Channel</button>
+        <button type="button" class="btn btn-primary">Add Payload</button>
+        <button type="button" class="btn btn-primary" onclick="displayTestCasesPopup()">Assertion</button>
+    </div>
+    <!-- <input type="text" id="messageInput" placeholder="Enter a message">
+    <button class="btn btn-primary" onclick="sendMessage()">Send Message</button> -->
+    <div id="search"><input type="text" id="searchThreads" placeholder="Search threads by name"
+            oninput="filterThreads()"></div>
+    <div id="container">
+        <div id="thread-list">
+        </div>
+        <div id="message-view">
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages"></div>
+
+                <div class="input-container">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 0.5rem;">
+                            <span id="mssg-type">Text</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li class="msg-options"><a class="dropdown-item"
+                                    onclick="handleMessageType('Text')">Text</a></li>
+                            <li class="msg-options"><a class="dropdown-item"
+                                    onclick="handleMessageType('JSON')">JSON</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" id="messageInput" class="input-field" placeholder="Type your message...">
+                    <button onclick="sendMessage()" class="send-button" disabled>Send</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="popup" id="popup-container" style="display: none;">
+        <button id="close-btn" onclick="closePopupThread()"><b>X</b></button>
+
+        <div class="bot_id">
+            <label for="bot_id"><b>Bot Id:</b></label>
+            <input type="text" id="bot_id" name="bot_id" placeholder="Enter your Bot-Id">
+        </div>
+        <div class="id-container">
+            <label for="identity"><b>Identity:</b></label>
+            <input type="text" id="identity" name="identity" placeholder="Enter your Identity">
+        </div>
+
+        <div class="Env">
+            <label for="environment-option"><b>Environment:</b></label>
+            <select id="environment-option" name="environment">
+                <option value="staging">Staging</option>
+                <option value="sit">SIT</option>
+                <option value="pre-prod">Pre-Production</option>
+                <option value="prod">Production</option>
+            </select>
+        </div>
+
+
+
+        <div class="channel">
+            <label for="channel-option"><b>Channel:</b></label>
+            <select id="channel-option" name="channel-option">
+
+
+            </select>
+        </div>
+
+        <button class="submit" onclick="submitForm()"><b>CREATE</b></button>
+    </div>
+
+    <div class="overlay" id="overlay-thread" onclick="closePopupThread()"></div>
+
+
+
+
+
+    <div class="popup" id="channelPopup" style="display: none;">
+        <button id="close-btn" onclick="closePopupChannel()"><b>X</b></button>
+
+        <div class="channel_name">
+            <label for="channel_name"><b>Channel Name : </b></label>
+            <input type="text" id="channel_name" name="channel_name" placeholder="Enter channel name">
+        </div>
+
+        <button class="submit" onclick="createChannel()"><b>CREATE</b></button>
+    </div>
+
+
+    <div class="popup" id="jsonPopup" style="display: none;">
+        <button id="close-btn" onclick="closeTestCasesPopup()"><b>X</b></button>
+        <!-- <div class="bot_id">
+            <label for="bot_id"><b>Bot Id:</b></label>
+            <input type="text" id="bot_id-testcase" name="bot_id-testcase" placeholder="Enter your Bot-Id">
+        </div> -->
+        <div class="id-container">
+            <label for="identity"><b>Identity:</b></label>
+            <input type="text" id="identity-testcase" name="identity-testcase" placeholder="Enter your Identity">
+        </div>
+        <div class="Env">
+            <label for="environment-testcase"><b>Environment:</b></label>
+            <select id="environment-testcase" name="environment">
+                <option value="staging">Staging</option>
+                <option value="sit">SIT</option>
+                <option value="pre-prod">Pre-Production</option>
+                <option value="prod">Production</option>
+            </select>
+        </div>
+
+        <div class="channel">
+            <label for="channel-testcase"><b>Channel:</b></label>
+            <select id="channel-testcase" name="channel-testcase">
+
+
+            </select>
+        </div>
+
+
+        <label for="testcases"><b>Enter Testcases : </b></label>
+
+        <div class="testcases-area">
+
+            <input type="file" id="testcases" required>
+        </div>
+
+        <button class="submit" onclick="submitTestCases()"><b>Run</b></button>
+    </div>
+
+    <div class="overlay" id="overlay-popup" onclick="closeTestCasesPopup()"></div>
+    <div class="overlay" id="overlay-channel" onclick="closePopupChannel()"></div>
+
+    <script src="./js/index.js"></script>
+
+</body>
+
+</html>
