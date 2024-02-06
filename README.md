@@ -1,4 +1,4 @@
-# Welcome to ChannelSimulator
+# Welcome to Channel Simulator
 
 ## Project Setup
 
@@ -13,4 +13,4 @@
 - Create a file by the name `test_results.txt` which will contain the results of the testcases as part of the Assertion Functionality.
 
 
-# channelSimulator
+

@@ -32,6 +32,7 @@ function InitializeSocket(ws, req) {
         else {
             mssgType = (JSON.parse(message).type === 'Text') ? 'text' : 'json';
         }
+
         const channel = JSON.parse(message).channel;
         try {
             const callbackId = `callback_${botId}_${channel}`;
@@ -86,10 +87,6 @@ const SetupAndStartServer = async () => {
 
         http://ngrok.com/callback/callback_st-1234_yesu001_ivr
      */
-
-    // 
-    // app.post('/api', ApiRoutes);
-
     app.listen(PORT, () => {
         console.log(`Server started at PORT:${PORT}`);
     });
@@ -97,34 +94,4 @@ const SetupAndStartServer = async () => {
 
 SetupAndStartServer();
 
-// function assertResponse(actualResponse, expectedResponse) {
-//     let expectedKeys = getAllKeys(expectedResponse);
-//     let actualKeys = getAllKeys(actualResponse);
-//     console.log('Actual Keys:', actualKeys);
-//     console.log('Expected keys:', expectedKeys);
-
-//     for (let key of actualKeys) {
-//         if (!expectedKeys.includes(key)) {
-//             console.log('Assertion was not successfull');
-//             return false;
-//         }
-//     }
-
-//     console.log('Assertion was successfull');
-
-//     return true;
-// }
-
-// function getAllKeys(obj) {
-//     let keysArr = [];
-
-//     for(let key of Object.keys(obj)){
-//         keysArr.push(key);
-
-//         if(typeof obj[key] == 'object'){
-//             keysArr = keysArr.concat(getAllKeys(obj[key]));
-//         }
-//     }
-//     return keysArr;
-// }
 
