@@ -5,8 +5,9 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
     if (channel === 'webhook') {
         console.log('Received message:', messageReceived);
         //console.log('Received Obj:', JSON.parse(message));
-        const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
-       
+        // const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
+        const apiUrl = config.apiUrlWebhook;
+
 
         let reqObj;
         console.log('This is client req webhook ---------->');
@@ -44,18 +45,15 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
             console.log('response from bot sync webhook:', responseFromBot);
             // const responseToSend = responseFromBot.data.data;
             const responseToSend = responseFromBot;
-            //console.log('response to send', responseToSend);
-            //console.log(responseToSend);
-            //ws.send(JSON.stringify({'val': ''}));
+
             if (responseToSend) {
-                //ws.send(JSON.stringify(responseToSend[0]));
                 let responseObj = {
                     'message': responseToSend[0],
                     'botId': botId,
                     'channel': channel,
                     'type': mssgType
                 };
-                
+
                 return JSON.stringify(responseObj);
             }
             else {
@@ -69,17 +67,13 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
     }
     else if (channel === 'amfb') {
         console.log('Received message:', messageReceived);
-    
-        const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
+
+        // const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
+        const apiUrl = config.apiUrlAMFB;
 
         let reqObj;
-        // console.log('This is client req AMFB---------->');
-        // console.log(messageReceived);
-        // console.log(mssgType);
-        // console.log(channel);
-        // console.log(botId);
+
         if (mssgType === 'json') {
-            //mssgType = 'text';
             reqObj = messageReceived;
             console.log('json was updated');
             console.log(reqObj);
@@ -104,24 +98,18 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
         };
 
         try {
-            
             const responseFromBot = await callToXo(apiUrl, reqObj, headers, channel);
-            //activeConnections.set(callbackId, ws);
-            // console.log('response from bot amfb:', responseFromBot.data);
-            // console.log('response Keys from bot amfb:', Object.keys(responseFromBot.data));
+
             let responseToSend;
             let responseType = responseFromBot.type;
             if (responseFromBot.type === 'text' && responseFromBot.hasOwnProperty('body')) {
-                //responseToSend = responseFromBot.data[0].body;
                 responseToSend = responseFromBot.body;
             }
             else {
                 responseToSend = responseFromBot;
             }
-            
 
             if (responseToSend) {
-                //ws.send(JSON.stringify(responseToSend[0]));
                 let responseObj = {
                     'message': {
                         'type': `${responseType}`,
@@ -130,35 +118,32 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
                     'botId': botId,
                     'channel': channel
                 };
-                // console.log(responseObj);
+
                 return JSON.stringify(responseObj)
             }
             else {
                 return JSON.stringify({ 'val': '' });
             }
-
         }
         catch (error) {
             return error;
-            
         }
-
     }
 }
 
-async function callToXo(apiUrl, reqObj, headers, channel){
+async function callToXo(apiUrl, reqObj, headers, channel) {
     let responseFromBot = await axios.post(apiUrl, reqObj, { headers });
 
-    if(channel === 'webhook'){
-       return responseFromBot.data.data;
+    if (channel === 'webhook') {
+        return responseFromBot.data.data;
     }
-    else if(channel === 'amfb'){
-        responseFromBot = responseFromBot.data[0]; 
+    else if (channel === 'amfb') {
+        responseFromBot = responseFromBot.data[0];
     }
 
-    console.log('call to xo response:::::', responseFromBot);
+    // console.log('call to xo response:::::', responseFromBot);
     return responseFromBot;
-} 
+}
 
 module.exports = {
     sendMessageToXO,

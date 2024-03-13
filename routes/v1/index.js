@@ -11,7 +11,6 @@ const storage = multer.diskStorage({
         cb(null, uploadDestination);
     },
     filename: function (req, file, cb) {
-        // Use the original file name
         const originalname = 'tests.json';
         cb(null, originalname);
     }

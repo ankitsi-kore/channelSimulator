@@ -69,15 +69,12 @@ const SetupAndStartServer = async () => {
     // Creating express object
     app.use(cors());
     app.use(bodyParser.json({ limit: '50mb' }));
-    //app.use(express.bodyParser({limit: '50mb'}));
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use('/api', ApiRoutes);
     app.use(express.static(path.join(__dirname, '/public')));
 
     app.ws('/ws', InitializeSocket);
-
-
     /**
         identity: yesu001
         botId: st-1234

@@ -6,7 +6,6 @@ var currentBotId = '';//For fetching current thread
 var pendingResponseChannel = ''; //For Fetching pending response thread
 var pendingResponseBotId = ''; //For Fetching pending response thread
 
-
 var fileDataReceived = '';
 
 // Connection opened
