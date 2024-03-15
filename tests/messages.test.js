@@ -18,10 +18,10 @@ test.each(testCases)('Test Case: %s', async (testCase) => {
         testCase.inputMessage,
         testCase.botId,
         'text',
-        'amfb'
+        testDetailsFile.channel
     );
 
-    let result = await callToXo(apiUrl, reqObj, headers, 'amfb');
+    let result = await callToXoTest(apiUrl, reqObj, headers, testDetailsFile.channel);
 
     // Create modified objects with "id" set to a fixed value
     let modifiedResult = { ...result, id: 'fixedIdValue' };
@@ -115,15 +115,15 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
 }
 
 
-// async function callToXoTest(apiUrl, reqObj, headers, channel){
-//     let responseFromBot = await axios.post(apiUrl, reqObj, { headers });
+async function callToXoTest(apiUrl, reqObj, headers, channel){
+    let responseFromBot = await axios.post(apiUrl, reqObj, { headers });
 
-//     if(channel === 'webhook'){
-//        return responseFromBot.data.data;
-//     }
-//     else if(channel === 'amfb'){
-//         responseFromBot = responseFromBot.data[0];
+    if(channel === 'webhook'){
+       return responseFromBot.data.data;
+    }
+    else if(channel === 'amfb'){
+        responseFromBot = responseFromBot.data[0];
         
-//     }
-//     return responseFromBot;
-// } 
+    }
+    return responseFromBot;
+} 
