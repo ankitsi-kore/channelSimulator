@@ -38,6 +38,7 @@ function InitializeSocket(ws, req) {
             const callbackId = `callback_${botId}_${channel}`;
             activeConnections.set(callbackId, ws);
             handler.websocketConnections(activeConnections);
+            console.log("channel:", channel);
             const responseObj = await messageHandler.sendMessageToXO(messageReceived, botId, mssgType, channel);
             console.log('response for user:', responseObj);
             ws.send(responseObj);

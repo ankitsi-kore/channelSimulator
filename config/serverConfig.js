@@ -6,5 +6,7 @@ module.exports = {
     TOKEN: process.env.TOKEN,
     XO_API_KEY: process.env.XO_API_KEY,
     apiUrlWebhook: process.env.apiUrlWebhook,
-    apiUrlAMFB: process.env.apiUrlAMFB
+    apiUrlAMFB: process.env.apiUrlAMFB,
+    apiUrlslack: process.env.apiUrlslack,
+    channelSimulatorCallbackUrl: process.env.channelSimulatorCallbackUrl
 };

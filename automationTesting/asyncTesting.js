@@ -1,22 +1,79 @@
+const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const config = require('../config/serverConfig');
+const _ = require('lodash');
+const testBot = require('../controllers/handler');
+const testDetailsFilePath = path.join(__dirname, '../', '/testcases', '/testdetails.json');
+const testDetailsFile = JSON.parse(fs.readFileSync(testDetailsFilePath, 'utf-8'));
+const testFilePath = path.join(__dirname, '../', '/testcases', 'tests.json');
 
-const sendMessageToXO = async function (messageReceived, botId, mssgType, channel) {
+const testCases = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
+
+async function startAsyncTesting(channel) {
+    try {
+        for (const testcase of testCases) {
+            let { apiUrl, reqObj, headers } = generatePayload(
+                testcase.inputMessage,
+                testcase.botId,
+                'text',
+                channel
+            );
+
+            // Await the callToXoTest function to receive the response
+            let result = await callToXoTest(apiUrl, reqObj, headers, testDetailsFile.channel);
+    
+            // Process the test case and wait until it's done
+            await processTestCase(testcase);
+
+            // Wait for some time to ensure the response is written to the file
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        // After all test cases are processed, proceed with further execution here
+        console.log('All test cases processed successfully.');
+    } catch (error) {
+        console.log('Error during testing:', error);
+        throw error;
+    }
+}
+
+
+
+async function processTestCase(testcase) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            let responseFilePath = path.join(__dirname, '../', 'testcases', 'assertionResponse.json')
+            let responseObject = JSON.parse(fs.readFileSync(responseFilePath, 'utf-8'));
+            let placeholder = '10';
+            let expectedWithoutNumbers = JSON.stringify(testcase.expectedObject).replace(/\d+(\.\d+)?/g, placeholder);
+            let resultWithoutNumbers = JSON.stringify(responseObject).replace(/\d+(\.\d+)?/g, placeholder);
+            // Normalize strings by removing extra whitespaces, including newlines
+            let normalizedExpectedObject = expectedWithoutNumbers.replace(/[+\s]/g, '');
+            let normalizedResult = resultWithoutNumbers.replace(/[+\s]/g, '');
+            if(_.isEqual(normalizedExpectedObject, normalizedResult)){
+                let testMessage = `Test case - ${testcase.inputMessage} :: PASSED\n`;
+                let testResultFile = path.join(__dirname, '../', 'test_results.txt');
+                fs.appendFileSync(testResultFile, testMessage);
+            }
+            else {
+                let strExpectedObject = JSON.stringify(testcase.expectedObject);
+                let strResponseObject = JSON.stringify(responseObject);
+                let testMessage = `Test case - ${testcase.inputMessage} :: FAILED\nExpected Object:${strExpectedObject}\n\nActual Object:${strResponseObject}\n\n`;
+                let testResultFile = path.join(__dirname, '../', 'test_results.txt');
+                fs.appendFileSync(testResultFile, testMessage);
+            }
+            resolve();
+        }, 1000);
+    });
+}
+
+function generatePayload(messageReceived, botId, mssgType, channel) {
     if (channel === 'webhook') {
-        console.log('Received message:', messageReceived);
-        //console.log('Received Obj:', JSON.parse(message));
-        // const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
-        const apiUrl = config.apiUrlWebhook;
-
+        const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
 
         let reqObj;
-        console.log('This is client req webhook ---------->');
-        //console.log(JSON.parse(messageReceived));
         if (mssgType === 'json') {
-            //mssgType = 'text';
             reqObj = messageReceived;
-            console.log('json was updated');
-            console.log(reqObj);
         }
         else {
             reqObj = {
@@ -28,7 +85,6 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
                     "id": "dadsfsfssfsff"
                 }
             };
-
         }
 
         const headers = {
@@ -38,42 +94,19 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
 
         const callbackId = `callback_${botId}_${channel}`;
 
-        try {
-
-            const responseFromBot = await callToXo(apiUrl, reqObj, headers, channel);
-            //activeConnections.set(callbackId, ws);
-            console.log('response from bot sync webhook:', responseFromBot);
-            // const responseToSend = responseFromBot.data.data;
-            const responseToSend = responseFromBot;
-
-            if (responseToSend) {
-                let responseObj = {
-                    'message': responseToSend[0],
-                    'botId': botId,
-                    'channel': channel,
-                    'type': mssgType
-                };
-
-                return JSON.stringify(responseObj);
-            }
-            else {
-                return JSON.stringify({ 'val': '' });
-            }
-        }
-        catch (error) {
-            console.log('Error in controller:', error);
-            return error;
-        }
+        return {
+            'apiUrl': apiUrl,
+            'reqObj': reqObj,
+            'headers': headers
+        };
     }
     else if (channel === 'amfb') {
-        console.log('Received message:', messageReceived);
-
         const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
+
         let reqObj;
+
         if (mssgType === 'json') {
             reqObj = messageReceived;
-            console.log('json was updated');
-            console.log(reqObj);
         }
         else {
             reqObj = {
@@ -94,39 +127,13 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
             "callbackUrl": `https://1cc3-115-114-88-222.ngrok-free.app/callback/${callbackId}`
         };
 
-        try {
-            const responseFromBot = await callToXo(apiUrl, reqObj, headers, channel);
-
-            let responseToSend;
-            let responseType = responseFromBot.type;
-            if (responseFromBot.type === 'text' && responseFromBot.hasOwnProperty('body')) {
-                responseToSend = responseFromBot.body;
-            }
-            else {
-                responseToSend = responseFromBot;
-            }
-
-            if (responseToSend) {
-                let responseObj = {
-                    'message': {
-                        'type': `${responseType}`,
-                        'val': responseToSend
-                    },
-                    'botId': botId,
-                    'channel': channel
-                };
-
-                return JSON.stringify(responseObj)
-            }
-            else {
-                return JSON.stringify({ 'val': '' });
-            }
-        }
-        catch (error) {
-            return error;
-        }
+        return {
+            'apiUrl': apiUrl,
+            'reqObj': reqObj,
+            'headers': headers
+        };
     }
-    else if(channel === 'slack'){
+    else if (channel === 'slack') {
         const apiUrl = `http://localhost/hooks/slack/${botId}`;
         console.log('apiUrl:', apiUrl);
         let reqObj;
@@ -169,7 +176,8 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
                     "channel": "D06",
                     "event_ts": "1712227419.090379",
                     "channel_type": "im",
-                    "channelSimulatorCallbackUrl": `${config.channelSimulatorCallbackUrl}_slack`
+                    "channelSimulatorCallbackUrl": `${config.channelSimulatorCallbackUrl}_slack`,
+                    'isAssertion': true
                 },
                 "type": "event_callback",
                 "event_id": "Ev06SBTHARJT",
@@ -192,45 +200,29 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
         const headers = {
             "Content-Type": "application/json"
         };
-        
-
-        try {
-            const responseFromBot = await callToXo(apiUrl, reqObj, headers, channel);
-
-            let responseToSend;
-            let responseType = responseFromBot.type;
-            if (responseFromBot.type === 'text' && responseFromBot.hasOwnProperty('body')) {
-                responseToSend = responseFromBot.body;
-            }
-            else {
-                responseToSend = responseFromBot;
-            }
-            
-            return JSON.stringify({ 'val': '' });
-        }
-        catch (error) {
-            return error;
-        }
+        return {
+            'apiUrl': apiUrl,
+            'reqObj': reqObj,
+            'headers': headers
+        };
     }
 }
 
-async function callToXo(apiUrl, reqObj, headers, channel) {
+async function callToXoTest(apiUrl, reqObj, headers, channel) {
     let responseFromBot = await axios.post(apiUrl, reqObj, { headers });
-
     if (channel === 'webhook') {
         return responseFromBot.data.data;
     }
     else if (channel === 'amfb') {
         responseFromBot = responseFromBot.data[0];
+
     }
-
-    // console.log('call to xo response:::::', responseFromBot);
+    else if (channel === 'slack') {
+        console.log('response from bot:', responseFromBot.data);
+    }
     return responseFromBot;
-}
-
-// async function 
+} 
 
 module.exports = {
-    sendMessageToXO,
-    callToXo
+    startAsyncTesting
 };

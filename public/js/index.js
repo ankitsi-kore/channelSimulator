@@ -719,7 +719,6 @@ function submitTestCases() {
             .then(response => {
                 if (response.status === 200) {
                     alert('Testing has been initiated');
-
                 } else {
                     throw new Error("Failed to upload test cases");
                 }

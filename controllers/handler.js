@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const asyncTesting = require('../automationTesting/asyncTesting');
 
 var activeConnections = {};
 // var currentTestDetails = {};
@@ -31,17 +32,44 @@ const fetchTestCases = async (req, res) => {
         'identity': req.body.identity
     };
 
-    const testDetailsFilePath = path.join(__dirname, '../', '/testcases', 'testdetails.json')
+    const testDetailsFilePath = path.join(__dirname, '../', '/testcases', 'testdetails.json');
 
     fs.writeFileSync(testDetailsFilePath, JSON.stringify(testDetails));
 
     const testResultFile = path.join(__dirname, '../', 'test_results.txt');
+    fs.writeFileSync(testResultFile, '');
 
-    let ws = activeConnections.get('fileBased-connection');
+    let ws = activeConnections?.get('fileBased-connection');
     console.log('testing will start');
     console.log('Bot test:', testBotDetails);
 
-    AsyncExec('npm test')
+    if(req.body.channel === 'slack'){
+        asyncTesting.startAsyncTesting(req.body.channel)
+        .then(() => {
+            fs.readFile(testResultFile, (err, data) => {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    let payload = {
+                        fileData: data.toString('base64'),
+                        isFile: true
+                    };
+
+                    ws.send(JSON.stringify(payload), (err) => {
+                        if (err) {
+                            console.log('Error sending testcases file');
+                        }
+                        else {
+                            console.log('Successfully sent the testcases file');
+                        }
+                    });
+                }
+            });
+        })
+    }
+    else {
+        AsyncExec('npm test')
         .then(result => {
             console.log('Output was new format:', result);
             
@@ -69,7 +97,7 @@ const fetchTestCases = async (req, res) => {
             });
         })
         .catch(err => {
-            let ws = activeConnections.get('fileBased-connection');
+            let ws = activeConnections?.get('fileBased-connection');
             console.log('Some error occurred while initiating testing');
             fs.writeFileSync(testResultFile, err.toString());
 
@@ -95,6 +123,7 @@ const fetchTestCases = async (req, res) => {
                 }
             });
         });
+    }
 
     res.status(200).json({
         success: true,
@@ -111,8 +140,6 @@ const asyncBotResponse = (req, res) => {
     let callbackId = req.url.split('/')[2];
     let botId = callbackId.split('_')[1];
     let channel = callbackId.split('_')[2];
-
-    let ws = activeConnections.get(callbackId);
 
     if (channel === 'webhook') {
         // Send a message to the WebSocket client
@@ -135,10 +162,34 @@ const asyncBotResponse = (req, res) => {
                 'channel': channel,
                 'type': type
             };
-
+            let ws = activeConnections.get(callbackId);
             console.log(responseObj);
             ws.send(JSON.stringify(responseObj));
         }
+    }
+    else if(channel === 'slack'){
+        console.log('Its slack channel');
+        console.log(req.body);
+        if(req.body.isAssertion){
+            delete req.body.isAssertion;
+            const assertionResponsesFile = path.join(__dirname, '../', '/testcases', 'assertionResponse.json')
+            fs.writeFileSync(assertionResponsesFile, JSON.stringify(req.body));
+            res.status(201).json({
+                'message': 'Response Received'
+            });
+            return;
+        }
+        let responseObj = {
+            'message': {
+                type: 'text',
+                val: req.body.text
+            },
+            'botId': botId,
+            'channel': channel,
+            'type': 'text',
+        };
+        let ws = activeConnections.get(callbackId);
+        ws.send(JSON.stringify(responseObj));
     }
     else {
         console.error('Channel not found');
