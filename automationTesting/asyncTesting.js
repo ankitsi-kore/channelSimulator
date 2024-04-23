@@ -10,7 +10,7 @@ const testFilePath = path.join(__dirname, '../', '/testcases', 'tests.json');
 
 const testCases = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
 
-async function startAsyncTesting(channel) {
+const startAsyncTesting = async function (channel) {
     try {
         for (const testcase of testCases) {
             let { apiUrl, reqObj, headers } = generatePayload(
@@ -20,16 +20,10 @@ async function startAsyncTesting(channel) {
                 channel
             );
 
-            // Await the callToXoTest function to receive the response
             let result = await callToXoTest(apiUrl, reqObj, headers, testDetailsFile.channel);
-    
-            // Process the test case and wait until it's done
             await processTestCase(testcase);
-
-            // Wait for some time to ensure the response is written to the file
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
-        // After all test cases are processed, proceed with further execution here
         console.log('All test cases processed successfully.');
     } catch (error) {
         console.log('Error during testing:', error);
@@ -37,12 +31,10 @@ async function startAsyncTesting(channel) {
     }
 }
 
-
-
-async function processTestCase(testcase) {
+const processTestCase = async function (testcase) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            let responseFilePath = path.join(__dirname, '../', 'testcases', 'assertionResponse.json')
+            let responseFilePath = path.join(__dirname, '../', 'testcases', 'asyncTestingResponse.json')
             let responseObject = JSON.parse(fs.readFileSync(responseFilePath, 'utf-8'));
             let placeholder = '10';
             let expectedWithoutNumbers = JSON.stringify(testcase.expectedObject).replace(/\d+(\.\d+)?/g, placeholder);
@@ -63,11 +55,11 @@ async function processTestCase(testcase) {
                 fs.appendFileSync(testResultFile, testMessage);
             }
             resolve();
-        }, 1000);
+        }, 10000);
     });
 }
 
-function generatePayload(messageReceived, botId, mssgType, channel) {
+const generatePayload = function (messageReceived, botId, mssgType, channel) {
     if (channel === 'webhook') {
         const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
 
@@ -175,9 +167,7 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
                     ],
                     "channel": "D06",
                     "event_ts": "1712227419.090379",
-                    "channel_type": "im",
-                    "channelSimulatorCallbackUrl": `${config.channelSimulatorCallbackUrl}_slack`,
-                    'isAssertion': true
+                    "channel_type": "im"
                 },
                 "type": "event_callback",
                 "event_id": "Ev06SBTHARJT",
@@ -198,7 +188,8 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
 
         const callbackId = `callback_${botId}_${channel}`;
         const headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "callbackurl": `${config.asyncTestingCallbackUrl}_${botId}_slack`
         };
         return {
             'apiUrl': apiUrl,
@@ -208,7 +199,7 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
     }
 }
 
-async function callToXoTest(apiUrl, reqObj, headers, channel) {
+const callToXoTest = async function (apiUrl, reqObj, headers, channel) {
     let responseFromBot = await axios.post(apiUrl, reqObj, { headers });
     if (channel === 'webhook') {
         return responseFromBot.data.data;

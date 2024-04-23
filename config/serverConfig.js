@@ -5,8 +5,9 @@ module.exports = {
     PORT : process.env.PORT,
     TOKEN: process.env.TOKEN,
     XO_API_KEY: process.env.XO_API_KEY,
-    apiUrlWebhook: process.env.apiUrlWebhook,
+    // apiUrlWebhook: process.env.apiUrlWebhook,
     apiUrlAMFB: process.env.apiUrlAMFB,
     apiUrlslack: process.env.apiUrlslack,
-    channelSimulatorCallbackUrl: process.env.channelSimulatorCallbackUrl
+    channelSimulatorCallbackUrl: process.env.channelSimulatorCallbackUrl,
+    asyncTestingCallbackUrl: process.env.asyncTestingCallbackUrl
 };

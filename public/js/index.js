@@ -36,25 +36,18 @@ socket.addEventListener('message', (event) => {
     if (receivedResponse.hasOwnProperty('isFile') || receivedResponse.hasOwnProperty('fileData')) {
         console.log('Received response file Data:', receivedResponse);
         showResults();
-
         const fileData = receivedResponse.fileData;
         //const additionalData = receivedResponse.additionalData;
-
         // Convert base64-encoded file data to a Blob
-
         console.log('File data:', fileData);
-
         fileDataReceived = fileData;
-
     }
     else {
         if (receivedResponse.channel === 'amfb') {
             if (receivedResponse.message.type === 'text') {
                 console.log('AMFB response:', receivedResponse.message);
                 const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
-
                 threadState.messages.push({ type: 'message received', content: receivedResponse.message.val, timestamp: getCurrentTimestamp() });
-
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
                 //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
@@ -62,9 +55,7 @@ socket.addEventListener('message', (event) => {
             else {
                 console.log('AMFB response:', receivedResponse.message);
                 const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
-
-                threadState.messages.push({ type: 'message received', content: JSON.stringify(receivedResponse.message), timestamp: getCurrentTimestamp()  });
-
+                threadState.messages.push({ type: 'message received', content: JSON.stringify(receivedResponse.message), timestamp: getCurrentTimestamp() });
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
                 //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
@@ -74,24 +65,15 @@ socket.addEventListener('message', (event) => {
             const receivedMessage = receivedResponse.message;
             console.log('Payload Message:', receivedMessage);
             const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
-
             threadState.messages.push({ type: 'message received', content: receivedMessage, timestamp: getCurrentTimestamp() });
-
             saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
             //displayReceivedMessage(receivedMessage.val);
             initializeCurrentThread(currentChannel, currentBotId);
-
         }
         else if (receivedResponse.hasOwnProperty('message')) {
             // = receivedResponse.message;
             console.log('Received message from server:', receivedResponse);
-
-            //  var decodedURL = decodeURIComponent(receivedResponse.message.val);
-            //  var doc = new DOMParser().parseFromString(decodedURL, 'text/html');
-            //  const receivedMessage = doc.body.textContent;
-
             const regex = /&quot;([^"]*)&quot;/g;
-
             if (regex.test(receivedResponse.message.val)) {
                 console.log('It was decoded');
                 const encodedString = receivedResponse.message.val;
@@ -99,16 +81,12 @@ socket.addEventListener('message', (event) => {
                 //console
                 receivedResponse.message.val = decodedString;
             }
-
             let receivedMessage = receivedResponse.message;
-
             //if(receivedMessage !== '' && )
             if (receivedMessage !== '' && receivedResponse.message.type === 'text') {
                 console.log('Its not a template');
                 const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
-
                 threadState.messages.push({ type: 'message received', content: receivedMessage.val, timestamp: getCurrentTimestamp() });
-
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
                 //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
@@ -116,13 +94,10 @@ socket.addEventListener('message', (event) => {
             else if (receivedMessage.val !== '' && receivedMessage.type === 'template') {
                 const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
                 console.log('It came here');
-
                 threadState.messages.push({ type: 'message received', content: JSON.stringify(receivedMessage), timestamp: getCurrentTimestamp() });
-
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
                 //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
-
             }
 
         }
@@ -138,18 +113,13 @@ socket.addEventListener('close', (event) => {
 function getThreadState(channel, BotId) {
     const key = `${BotId}-${channel}`;
     const storedState = localStorage.getItem(key);
-
     return storedState ? JSON.parse(storedState) : { messages: [] };
-
 }
 
 function saveThread(channel, BotId, state) {
     const key = `${BotId}-${channel}`;
-
     localStorage.setItem(key, JSON.stringify(state));
 }
-
-
 
 function displayThreadPopup() {
     let popupWindow = document.getElementById('popup-container');
@@ -200,34 +170,40 @@ function createChannel() {
         "channel_name": params
     };
 
-    var xhrGet = new XMLHttpRequest();
-    var urlGet = "https://658175963dfdd1b11c435308.mockapi.io/channels";
+    // var xhrGet = new XMLHttpRequest();
+    // var urlGet = "https://658175963dfdd1b11c435308.mockapi.io/channels";
+    // xhrGet.open("GET", urlGet, true);
+    // xhrGet.onreadystatechange = function () {
+    //     if (xhrGet.readyState == 4) {
+    //         if (xhrGet.status == 201) {
+    //             var existingChannels = JSON.parse(xhrGet.responseText.data);
+    //             var isObjectAlreadyExists = checkIfObjectExists(existingChannels, obj);
+    //             if (!isObjectAlreadyExists) {
+    //                 createNewChannel();
+    //             } else {
+    //                 alert("channel already exists!!!");
+    //                 params = "";
+    //                 closePopupChannel();
+    //             }
+    //         } else {
+    //             console.error("Error occurred while fetching existing channels");
+    //         }
+    //     }
+    // };
+    // xhrGet.send();
 
-    xhrGet.open("GET", urlGet, true);
-    xhrGet.onreadystatechange = function () {
-        if (xhrGet.readyState == 4) {
-            if (xhrGet.status == 200) {
-                var existingChannels = JSON.parse(xhrGet.responseText);
-
-                var isObjectAlreadyExists = checkIfObjectExists(existingChannels, obj);
-
-                if (!isObjectAlreadyExists) {
-                    createNewChannel();
-                } else {
-                    alert("channel already exists!!!");
-                    params = "";
-                    closePopupChannel();
-                }
-            } else {
-                console.error("Error occurred while fetching existing channels");
-            }
-        }
-    };
-    xhrGet.send();
+    var existingChannels = JSON.parse(localStorage.getItem('channels'));
+    var isObjectAlreadyExists = checkIfObjectExists(existingChannels, obj);
+    if (!isObjectAlreadyExists) {
+        createNewChannel();
+    } else {
+        alert("channel already exists!!!");
+        params = "";
+        closePopupChannel();
+    }
 }
 
 function checkIfObjectExists(existingChannels, newObj) {
-
     return existingChannels.some(channel => channel.channel_name === newObj.channel_name);
 }
 
@@ -236,18 +212,17 @@ function createNewChannel() {
     var obj = {
         "channel_name": params
     };
-
     console.log("...............creating channel");
-
     var xhrPost = new XMLHttpRequest();
-    var urlPost = "https://658175963dfdd1b11c435308.mockapi.io/channels";
-
+    var urlPost = "http://localhost:5005/api/v1/channels";
     xhrPost.open("POST", urlPost, true);
     xhrPost.setRequestHeader("Content-type", "application/json");
     xhrPost.onreadystatechange = function () {
         if (xhrPost.readyState == 4) {
             if (xhrPost.status == 201) {
                 console.log(xhrPost.responseText);
+                let updatedChannels = JSON.parse(xhrPost.responseText);
+                localStorage.setItem('channels', updatedChannels.data);
                 getChannels();
                 closePopupChannel();
                 alert('New channel is Added !!!');
@@ -258,38 +233,21 @@ function createNewChannel() {
         }
     };
     xhrPost.send(JSON.stringify(obj));
-
     closePopupChannel();
 }
 
-function setChannels(data) {
-
-    var responseData = data;
-
+function setChannels() {
+    var responseData = JSON.parse(localStorage.getItem('channels'));
     var channelOptionsThreads = document.getElementById("channel-option");
     channelOptionsThreads.innerHTML = '';
-
     var channelOptionsTestcase = document.getElementById("channel-testcase");
     channelOptionsTestcase.innerHTML = '';
 
-    var defaultOption = document.createElement("option");
-    defaultOption.value = "webhook";
-    defaultOption.text = "WebHook";
-
-    var defaultOptionTestcase = document.createElement("option");
-    defaultOptionTestcase.value = "webhook";
-    defaultOptionTestcase.text = "WebHook";
-
-    channelOptionsThreads.appendChild(defaultOption);
-    channelOptionsTestcase.appendChild(defaultOptionTestcase);
-
-    for (var i = 0; i < responseData.length; i++) {
-        var channel = responseData[i].channel_name;
+    for (var currChannel = 0; currChannel < responseData.length; currChannel++) {
+        var channel = responseData[currChannel].channel_name;
         channel = channel.toLowerCase();
-
         var option = document.createElement("option");
         var optionTestcase = document.createElement("option");
-
         if (channel === 'apple') {
             option.value = 'amfb';
             optionTestcase.value = 'amfb';
@@ -300,32 +258,36 @@ function setChannels(data) {
         }
         option.text = channel;
         optionTestcase.text = channel;
-
         channelOptionsThreads.appendChild(option);
         channelOptionsTestcase.appendChild(optionTestcase);
     }
-
 }
 
 function getChannels() {
-
-    var xhr = new XMLHttpRequest();
-    var url = "https://658175963dfdd1b11c435308.mockapi.io/channels";
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                var responseData = JSON.parse(xhr.responseText);
-                setChannels(responseData);
-                // console.log(responseData);
-                // console.log(responseData.length);
-            } else {
-                console.error("Error occurred");
+    if (!localStorage.getItem('channels')) {
+        var xhr = new XMLHttpRequest();
+        var url = "http://localhost:5005/api/v1/channels";//"https://658175963dfdd1b11c435308.mockapi.io/channels";
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    var responseData = JSON.parse(xhr.responseText);
+                    console.log('channelsData:', responseData);
+                    localStorage.setItem('channels', responseData.data);
+                    // setChannels(JSON.parse(responseData?.data));
+                    setChannels();
+                    // console.log(responseData);
+                    // console.log(responseData.length);
+                } else {
+                    console.error("Error occurred");
+                }
             }
-        }
-    };
-    xhr.send();
-
+        };
+        xhr.send();
+    }
+    else {
+        setChannels();
+    }
 }
 
 function initializeThreads() {
@@ -375,9 +337,7 @@ function filterThreads() {
         // Check if the search query has changed
         if (searchQuery !== previousSearchQuery || searchQuery.length === 1 || searchQuery.length === 0) {
             previousSearchQuery = searchQuery;
-
             const filteredItems = threads.filter(item => item.identity.toLowerCase().includes(searchQuery));
-
             displaylistThreads(filteredItems);
         }
     });
@@ -394,32 +354,24 @@ function displaylistThreads(threads) {
 
     for (let i = threads.length - 1; i >= 0; i--) {
         let currentThread = threads[i];
-
-
         let threadItem = document.createElement('div');
         threadItem.className = 'thread-list-item';
         threadItem.id = `${currentThread.bot_id}-${currentThread.channel}`;
         threadItem.onclick = () => initializeCurrentThread(currentThread.channel, currentThread.bot_id);
-
         threadItem.innerHTML = `
             <span class="thread-name">${currentThread.identity}-${currentThread.channel}</span><br>
           `;
-
         threadList.appendChild(threadItem);
     }
-
 }
 
 function submitForm() {
     let botId = document.getElementById('bot_id').value;
-
-
-    //let name = 'Thread ABC';
     let environment = document.getElementById('environment-option').value;
     let channel = document.getElementById('channel-option').value;
     let identity = document.getElementById('identity').value;
 
-    let reqObj = {
+    let threadDetails = {
         'bot_id': botId,
         'identity': identity,
         'environment': environment,
@@ -431,10 +383,10 @@ function submitForm() {
     }
     else {
         if (botId && environment && channel && identity) {
-            console.log(reqObj);
+            console.log(threadDetails);
             let threads = JSON.parse(localStorage.getItem('threads'));
 
-            threads.push(reqObj);
+            threads.push(threadDetails);
             console.log('Threads in local storage');
             console.log(threads);
             //localStorage.removeItem('threads');
@@ -444,7 +396,21 @@ function submitForm() {
             document.getElementsByClassName('send-button').disabled = true;
             updateCurrentThreadDetails(channel, botId);
             alert('Sucessfully added the thread');
-            window.location.reload();
+
+            let threadList = document.getElementById('thread-list');
+
+            let threadItem = document.createElement('div');
+            threadItem.className = 'thread-list-item';
+            threadItem.id = `${botId}-${channel}`;
+            threadItem.onclick = () => initializeCurrentThread(channel, botId);
+
+            threadItem.innerHTML = `
+            <span class="thread-name">${identity}-${channel}</span><br>
+            `;
+            threadList.insertBefore(threadItem, threadList.firstChild);
+            clearThreadForm();
+            closePopupThread();
+            // window.location.reload();
         }
         else {
             alert('Fill All the Details !!!');
@@ -452,6 +418,10 @@ function submitForm() {
     }
 }
 
+function clearThreadForm() {
+    document.getElementById('bot_id').value = '';
+    document.getElementById('identity').value = '';
+}
 
 function sendMessage() {
 
@@ -460,8 +430,6 @@ function sendMessage() {
 
     const mssgType = document.getElementById('mssg-type').innerText;
     console.log(message);
-
-
     // Send the message over the WebSocket connection
     socket.send(JSON.stringify({
         "message": message,
@@ -556,14 +524,6 @@ function displayReceivedMessage(messageText, time) {
     chatMessages.appendChild(messageDiv);
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    // const threadState = getThreadState(currentBotId, currentIdentity);
-
-    // threadState.messages.push({type: 'message received', content: messageText});
-
-    // saveThread(currentBotId, currentIdentity, threadState);
-
-
 }
 
 //simulateReceivedMessage();
@@ -576,8 +536,6 @@ document.getElementById('messageInput').addEventListener('keyup', function (even
         else {
             alert('Please Select a Thread or create a new one !!!');
         }
-
-        //sendMessage();
     }
 });
 
@@ -588,8 +546,6 @@ function initializeCurrentThread(channel, BotId) {
     document.getElementsByClassName('send-button')[0].disabled = false;
     updateCurrentThreadDetails(channel, BotId);
     const currentThreadState = getThreadState(channel, BotId);
-
-
     currentThreadState.messages.forEach(currentMssg => {
         if (currentMssg.type === 'message received') {
             displayReceivedMessage(currentMssg.content, currentMssg.timestamp);
@@ -601,8 +557,6 @@ function initializeCurrentThread(channel, BotId) {
 }
 
 function updateCurrentThreadDetails(channel, BotId) {
-    //return {botId, identity};
-
     currentChannel = channel;
     currentBotId = BotId;
 }
@@ -700,7 +654,6 @@ function submitTestCases() {
     let environment = document.getElementById('environment-testcase').value;
     let channel = document.getElementById('channel-testcase').value;
     let identity = document.getElementById('identity-testcase').value;
-
     let formData = new FormData();
     // formData.append('botId', botId);
     formData.append('testcases', testcases.files[0]);
@@ -711,7 +664,6 @@ function submitTestCases() {
     if (testcases.files.length > 0 && environment && channel && identity) {
         closeTestCasesPopup();
         showLoadingSpinner();
-
         fetch("http://localhost:5005/api/v1/testcase", {
             method: 'POST',
             body: formData
@@ -744,15 +696,12 @@ function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
         for (let i = 0; i < slice.length; i++) {
             byteNumbers[i] = slice.charCodeAt(i);
         }
-
         const byteArray = new Uint8Array(byteNumbers);
         byteArrays.push(byteArray);
     }
-
     const blob = new Blob(byteArrays, { type: contentType });
     return blob;
 }
-
 
 function showLoadingSpinner() {
     // Create and show a loading spinner with text

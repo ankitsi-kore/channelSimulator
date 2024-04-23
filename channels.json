@@ -1,0 +1,18 @@
+[
+    {
+        "channel_name": "slack",
+        "id": 1
+    },
+    {
+        "channel_name": "amfb",
+        "id": 2
+    },
+    {
+        "channel_name": "webhook",
+        "id": 3
+    },
+    {
+        "channel_name": "msteams",
+        "id": 4
+    }
+]
