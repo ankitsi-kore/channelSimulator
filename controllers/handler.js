@@ -69,9 +69,7 @@ const fetchTestCases = async function (req, res) {
             asyncExec('npm test')
                 .then(result => {
                     console.log('Output was new format:', result);
-
                     fs.writeFileSync(testResultFile, result.stdout + result.stderr);
-
                     fs.readFile(testResultFile, (err, data) => {
                         if (err) {
                             console.log(err);
@@ -81,7 +79,6 @@ const fetchTestCases = async function (req, res) {
                                 fileData: data.toString('base64'),
                                 isFile: true
                             };
-
                             ws.send(JSON.stringify(payload), (err) => {
                                 if (err) {
                                     console.log('Error sending testcases file');
@@ -107,7 +104,6 @@ const fetchTestCases = async function (req, res) {
                                 fileData: data.toString('base64'),
                                 isFile: true
                             };
-
                             ws.send(JSON.stringify(payload), (err) => {
                                 if (err) {
                                     console.log('Error sending testcases file');
@@ -262,7 +258,7 @@ const addChannel = function (req, res) {
         });
 
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
         return res.status(500).json({
             success: false,

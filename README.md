@@ -5,11 +5,11 @@
 - Create a `.env` file in the root directory of the project.
 - In `.env` file assign the following variables with appropriate values.
 ```
-    PORT = "Enter PORT Number"
-    TOKEN = "Enter Token"
-    XO_API_KEY = "Enter API Key"
-    apiUrlWebhook = "Enter API URL For Webhook channel"
-    apiUrlAMFB = "Enter API URL For AMFB channel"
+    PORT = 'Enter Port Number'
+    TOKEN =  'Enter Token'
+    XO_API_KEY = 'Enter XO_API_KEY'
+    channelSimulatorCallbackUrl = 'your-ngrok-url/api/v1/callback/callback'
+    asyncTestingCallbackUrl = 'your-ngrok-url/api/v1/asynctesting/callback/callback'
 ```
 - For Asynchronous channels functionality the callback url should be of the following format
   `https://ngrok-url/api/v1/callback/callback_your-bot-id_channel-name`. For example, in case of Webhook channel the callback url would be `https://ngrok-url/api/v1/callback/callback_your-bot-id_webhook`
