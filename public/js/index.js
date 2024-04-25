@@ -572,94 +572,18 @@ function handleMessageType(type) {
     msgType.innerText = type;
 }
 
-// function submitTestCases() {
-//     let testcases = document.getElementById('testcases');
-//     let botId = document.getElementById('bot_id-testcase').value;
-
-
-//     //let name = 'Thread ABC';
-//     let environment = document.getElementById('environment-testcase').value;
-//     let channel = document.getElementById('channel-testcase').value;
-//     let identity = document.getElementById('identity-testcase').value;
-
-//     // let reqObj = {
-//     //     'botId': botId,
-//     //     'testcases': testcases.value,
-//     //     'environment': environment,
-//     //     'channel': channel,
-//     //     'identity': identity
-//     // };
-
-//     let formData = new FormData();
-//     formData.append('botId', botId);
-//     formData.append('testcases', testcases.files[0]);
-//     formData.append('environment', environment);
-//     formData.append('channel', channel);
-//     formData.append('identity', identity);
-
-
-//     if (botId, testcases, environment, channel, identity) {
-//         closeTestCasesPopup();
-//         let url = "http://localhost:5005/api/v1/testcase";
-
-//         fetch(url, {
-//             method: 'POST',
-//             body: formData
-//         })
-//             .then(response => {
-//                 if (response.status === 201) {
-//                     console.log(response);
-//                     const blob = response.blob();
-//                     const blobUrl = URL.createObjectURL(blob);
-
-//                     // Create a link element
-//                     const link = document.createElement("a");
-
-//                     // Set link's href to point to the Blob URL
-//                     link.href = blobUrl;
-//                     link.download = 'test_results.txt';
-
-//                     // Append link to the body
-//                     document.body.appendChild(link);
-
-//                     // Dispatch click event on the link
-//                     // This is necessary as link.click() does not work on the latest firefox
-//                     link.dispatchEvent(
-//                       new MouseEvent('click', { 
-//                         bubbles: true, 
-//                         cancelable: true, 
-//                         view: window 
-//                       })
-//                     );
-
-//                     // Remove link from body
-//                     document.body.removeChild(link);
-
-//                     // window.location.reload();
-//                     //closeTestCasesPopup();
-//                 }
-//             })
-//             .catch(err => {
-//                 throw err;
-//             });
-//     }
-//     else {
-//         alert("Please Fill All the Details !!!");
-//     }
-// }
-
 function submitTestCases() {
     let testcases = document.getElementById('testcases');
     // let botId = document.getElementById('bot_id-testcase').value;
-    let environment = document.getElementById('environment-testcase').value;
-    let channel = document.getElementById('channel-testcase').value;
-    let identity = document.getElementById('identity-testcase').value;
+    let environment = document.getElementById('environment-testcase');
+    let channel = document.getElementById('channel-testcase');
+    let identity = document.getElementById('identity-testcase');
     let formData = new FormData();
     // formData.append('botId', botId);
     formData.append('testcases', testcases.files[0]);
-    formData.append('environment', environment);
-    formData.append('channel', channel);
-    formData.append('identity', identity);
+    formData.append('environment', environment.value);
+    formData.append('channel', channel.value);
+    formData.append('identity', identity.value);
 
     if (testcases.files.length > 0 && environment && channel && identity) {
         closeTestCasesPopup();
@@ -671,6 +595,8 @@ function submitTestCases() {
             .then(response => {
                 if (response.status === 200) {
                     alert('Testing has been initiated');
+                    testcases.value = '';
+                    identity.value = '';
                 } else {
                     throw new Error("Failed to upload test cases");
                 }
