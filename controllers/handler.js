@@ -193,15 +193,26 @@ const asyncBotResponse = function (req, res) {
     }
 };
 
+const isStringifiedJSON = function (value) {
+    try {
+        const parsedValue = JSON.parse(value);
+        console.log('parsed value::', parsedValue);
+        return parsedValue;
+    } catch (error) {
+        return false;
+    }
+}
+
 const asyncTestingResponse = function (req, res) {
     try {
-        // delete req.body.isAssertion;
         console.log('request came in asyncTestingResponse')
-        const assertionResponsesFile = path.join(__dirname, '../', '/testcases', 'asyncTestingResponse.json')
-        fs.writeFileSync(assertionResponsesFile, JSON.stringify(req.body));
-
-        // console.log(req.headers.channelsimulatorcallbackurl);
-
+        console.log(JSON.stringify(req.body));
+        let currTestResponse = req.body;
+        let parsedText = isStringifiedJSON(req.body.text);
+        if(parsedText){
+            currTestResponse.text = parsedText
+        }
+        asyncTesting.getCurrTestResponse(currTestResponse);
         return res.status(201).json({
             'message': 'Response Received'
         });

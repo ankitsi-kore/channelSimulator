@@ -5,7 +5,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
     if (channel === 'webhook') {
         console.log('Received message:', messageReceived);
         //console.log('Received Obj:', JSON.parse(message));
-        const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
+        const apiUrl = `${config.apiUrlWebhook}/${botId}`;//`http://localhost/chatbot/v2/webhook/${botId}`;
         let reqObj;
         console.log('This is client req webhook ---------->');
         if (mssgType === 'json') {
@@ -58,7 +58,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
     else if (channel === 'amfb') {
         console.log('Received message:', messageReceived);
 
-        const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
+        const apiUrl = `${config.apiUrlAMFB}/${botId}`;//`http://localhost/adapter/hooks/amfb/${botId}`;
         let reqObj;
         if (mssgType === 'json') {
             reqObj = messageReceived;
@@ -113,7 +113,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
         }
     }
     else if(channel === 'slack'){
-        const apiUrl = `http://localhost/hooks/slack/${botId}`;
+        const apiUrl = `${config.apiUrlSlack}/${botId}`;
         console.log('apiUrl:', apiUrl);
         let reqObj;
         if (mssgType === 'json') {
@@ -152,7 +152,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
                             ]
                         }
                     ],
-                    "channel": "D06",
+                    "channel": "channelSimulator",
                     "event_ts": "1712227419.090379",
                     "channel_type": "im"
                 },
@@ -176,7 +176,7 @@ const sendMessageToXO = async function (messageReceived, botId, mssgType, channe
         const callbackId = `callback_${botId}_${channel}`;
         const headers = {
             "Content-Type": "application/json",
-            "callbackurl": `${config.channelSimulatorCallbackUrl}_${botId}_slack`
+            "simulatorcallbackurl": `${config.channelSimulatorCallbackUrl}_${botId}_slack`
         };
         
         try {
@@ -215,5 +215,6 @@ const callToXo = async function (apiUrl, reqObj, headers, channel) {
 
 module.exports = {
     sendMessageToXO,
-    callToXo
+    callToXo,
+    getCurrTestResponse: require('./handler')
 };

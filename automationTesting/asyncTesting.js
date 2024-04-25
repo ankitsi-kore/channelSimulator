@@ -5,13 +5,14 @@ const config = require('../config/serverConfig');
 const _ = require('lodash');
 const testBot = require('../controllers/handler');
 const testDetailsFilePath = path.join(__dirname, '../', '/testcases', '/testdetails.json');
-const testDetailsFile = JSON.parse(fs.readFileSync(testDetailsFilePath, 'utf-8'));
 const testFilePath = path.join(__dirname, '../', '/testcases', 'tests.json');
-
-const testCases = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
+var currTestingResponse = {};
 
 const startAsyncTesting = async function (channel) {
     try {
+        const testCases = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
+        const testDetailsFile = JSON.parse(fs.readFileSync(testDetailsFilePath, 'utf-8'));
+
         for (const testcase of testCases) {
             let { apiUrl, reqObj, headers } = generatePayload(
                 testcase.inputMessage,
@@ -27,21 +28,24 @@ const startAsyncTesting = async function (channel) {
         console.log('All test cases processed successfully.');
     } catch (error) {
         console.log('Error during testing:', error);
-        throw error;
     }
 }
 
 const processTestCase = async function (testcase) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            let responseFilePath = path.join(__dirname, '../', 'testcases', 'asyncTestingResponse.json')
-            let responseObject = JSON.parse(fs.readFileSync(responseFilePath, 'utf-8'));
+            let responseObject = currTestingResponse;//handler.getCurrTestResponse();//JSON.parse(fs.readFileSync(responseFilePath, 'utf-8'));
             let placeholder = '10';
+            console.log('response Object:', JSON.stringify(responseObject));
+
             let expectedWithoutNumbers = JSON.stringify(testcase.expectedObject).replace(/\d+(\.\d+)?/g, placeholder);
             let resultWithoutNumbers = JSON.stringify(responseObject).replace(/\d+(\.\d+)?/g, placeholder);
+            console.log('Actual Result:', resultWithoutNumbers);
             // Normalize strings by removing extra whitespaces, including newlines
             let normalizedExpectedObject = expectedWithoutNumbers.replace(/[+\s]/g, '');
             let normalizedResult = resultWithoutNumbers.replace(/[+\s]/g, '');
+            normalizedExpectedObject = JSON.parse(normalizedExpectedObject);
+            normalizedResult = JSON.parse(normalizedResult);
             if(_.isEqual(normalizedExpectedObject, normalizedResult)){
                 let testMessage = `Test case - ${testcase.inputMessage} :: PASSED\n`;
                 let testResultFile = path.join(__dirname, '../', 'test_results.txt');
@@ -55,14 +59,13 @@ const processTestCase = async function (testcase) {
                 fs.appendFileSync(testResultFile, testMessage);
             }
             resolve();
-        }, 10000);
+        }, 4000);
     });
 }
 
 const generatePayload = function (messageReceived, botId, mssgType, channel) {
     if (channel === 'webhook') {
         const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
-
         let reqObj;
         if (mssgType === 'json') {
             reqObj = messageReceived;
@@ -165,7 +168,7 @@ const generatePayload = function (messageReceived, botId, mssgType, channel) {
                             ]
                         }
                     ],
-                    "channel": "D06",
+                    "channel": "channelSimulator",
                     "event_ts": "1712227419.090379",
                     "channel_type": "im"
                 },
@@ -189,7 +192,7 @@ const generatePayload = function (messageReceived, botId, mssgType, channel) {
         const callbackId = `callback_${botId}_${channel}`;
         const headers = {
             "Content-Type": "application/json",
-            "callbackurl": `${config.asyncTestingCallbackUrl}_${botId}_slack`
+            "simulatorcallbackurl": `${config.asyncTestingCallbackUrl}_${botId}_slack`
         };
         return {
             'apiUrl': apiUrl,
@@ -214,6 +217,13 @@ const callToXoTest = async function (apiUrl, reqObj, headers, channel) {
     return responseFromBot;
 } 
 
+const getCurrTestResponse = function (expectedObject){
+    if(expectedObject){
+        currTestingResponse = expectedObject;
+    }
+}
+
 module.exports = {
-    startAsyncTesting
+    startAsyncTesting,
+    getCurrTestResponse
 };

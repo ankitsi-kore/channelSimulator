@@ -22,7 +22,6 @@ function InitializeSocket(ws, req) {
     ws.on('message', async (message) => {
         const messageReceived = JSON.parse(message).message;
         const botId = JSON.parse(message).botId;
-        // let mssgType = (JSON.parse(message).type === 'Text') ? 'text' : 'json';
         let mssgType = '';
         if (JSON.parse(message).type === 'file') {
             activeConnections.set('fileBased-connection', ws);
