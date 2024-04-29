@@ -31,7 +31,6 @@ function InitializeSocket(ws, req) {
         else {
             mssgType = (JSON.parse(message).type === 'Text') ? 'text' : 'json';
         }
-
         const channel = JSON.parse(message).channel;
         try {
             const callbackId = `callback_${botId}_${channel}`;
@@ -56,7 +55,6 @@ function InitializeSocket(ws, req) {
             console.log(err);
             ws.send(responseObj);
         }
-
     });
 
     ws.on('close', () => {

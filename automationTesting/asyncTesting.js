@@ -59,13 +59,13 @@ const processTestCase = async function (testcase) {
                 fs.appendFileSync(testResultFile, testMessage);
             }
             resolve();
-        }, 4000);
+        }, 6000);
     });
 }
 
 const generatePayload = function (messageReceived, botId, mssgType, channel) {
     if (channel === 'webhook') {
-        const apiUrl = `http://localhost/chatbot/v2/webhook/${botId}`;
+        const apiUrl = `${config.apiUrlWebhook}/${botId}`;;
         let reqObj;
         if (mssgType === 'json') {
             reqObj = messageReceived;
@@ -81,14 +81,11 @@ const generatePayload = function (messageReceived, botId, mssgType, channel) {
                 }
             };
         }
-
         const headers = {
             "Authorization": config.TOKEN,
             "Content-Type": "application/json",
         };
-
         const callbackId = `callback_${botId}_${channel}`;
-
         return {
             'apiUrl': apiUrl,
             'reqObj': reqObj,
@@ -96,10 +93,8 @@ const generatePayload = function (messageReceived, botId, mssgType, channel) {
         };
     }
     else if (channel === 'amfb') {
-        const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
-
+        const apiUrl = `${config.apiUrlAMFB}/${botId}`;//`http://localhost/adapter/hooks/amfb/${botId}`;
         let reqObj;
-
         if (mssgType === 'json') {
             reqObj = messageReceived;
         }
@@ -129,7 +124,7 @@ const generatePayload = function (messageReceived, botId, mssgType, channel) {
         };
     }
     else if (channel === 'slack') {
-        const apiUrl = `http://localhost/hooks/slack/${botId}`;
+        const apiUrl = `${config.apiUrlSlack}/${botId}`//`http://localhost/hooks/slack/${botId}`;
         console.log('apiUrl:', apiUrl);
         let reqObj;
         if (mssgType === 'json') {
@@ -209,7 +204,6 @@ const callToXoTest = async function (apiUrl, reqObj, headers, channel) {
     }
     else if (channel === 'amfb') {
         responseFromBot = responseFromBot.data[0];
-
     }
     else if (channel === 'slack') {
         console.log('response from bot:', responseFromBot.data);

@@ -40,8 +40,8 @@ const fetchTestCases = async function (req, res) {
         let ws = activeConnections?.get('fileBased-connection');
         console.log('testing will start');
         console.log('Bot test:', testBotDetails);
-
-        if (req.body.channel === 'slack') {
+        let channel = req.body.channel;
+        if (channel === 'slack' || channel === 'webhook') {
             asyncTesting.startAsyncTesting(req.body.channel)
                 .then(() => {
                     fs.readFile(testResultFile, (err, data) => {
@@ -145,6 +145,7 @@ const asyncBotResponse = function (req, res) {
                 console.log('Request body is made ------------------------------->');
                 console.log("async webhook response:", req.body);
                 console.log(" keys of async webhook response:", Object.keys(req.body));
+                console.log("Req body data:", req.body.data[0]);
                 let message = req.body.data[0];
                 let type = 'text';
                 if (message.type === 'template') {
@@ -176,6 +177,7 @@ const asyncBotResponse = function (req, res) {
             };
             let ws = activeConnections.get(callbackId);
             ws.send(JSON.stringify(responseObj));
+
         }
         else {
             console.error('Channel not found');
@@ -205,12 +207,30 @@ const isStringifiedJSON = function (value) {
 
 const asyncTestingResponse = function (req, res) {
     try {
-        console.log('request came in asyncTestingResponse')
-        console.log(JSON.stringify(req.body));
-        let currTestResponse = req.body;
-        let parsedText = isStringifiedJSON(req.body.text);
-        if(parsedText){
-            currTestResponse.text = parsedText
+        let callbackId = req.url.split('/')[3];
+        // let botId = callbackId.split('_')[1];
+        let channel = callbackId.split('_')[2];
+        console.log("Its asyncTesting Response");
+        let currTestResponse = {};
+        console.log('req url:', req.url);
+
+        if (channel === 'slack') {
+            console.log('request came in asyncTestingResponse(slack)')
+            console.log(JSON.stringify(req.body));
+            currTestResponse = req.body;
+            let parsedText = isStringifiedJSON(req.body.text);
+            if (parsedText) {
+                currTestResponse.text = parsedText
+            }
+        }
+        else if (channel === 'webhook') {
+            console.log('request came in asyncTestingResponse(webhook)')
+            console.log(JSON.stringify(req.body));
+            currTestResponse = req.body.data[0];
+            let parsedText = isStringifiedJSON(req.body.data[0]);
+            if (parsedText) {
+                currTestResponse = parsedText
+            }
         }
         asyncTesting.getCurrTestResponse(currTestResponse);
         return res.status(201).json({
@@ -267,7 +287,6 @@ const addChannel = function (req, res) {
             message: 'Successfully added the channel',
             err: {}
         });
-
     }
     catch (err) {
         console.log(err);

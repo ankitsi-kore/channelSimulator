@@ -43,7 +43,7 @@ html {
 
 .thread-list-item {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     background-color: rgb(185, 179, 179);
     margin: 5px;
     /* border: none; */
@@ -73,7 +73,7 @@ html {
 .thread-name {
     font-weight: bold;
     font-size: 20px;
-    margin-left: 0.5rem;
+    margin-left: 5.5rem;
 }
 
 .contact-info {
@@ -713,4 +713,9 @@ html {
 
 .x-mark {
     background-color: #f44336;
+}
+
+.chat-icon {
+    margin-left: 5px;
+    padding: 2px;
 }

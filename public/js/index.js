@@ -13,7 +13,7 @@ socket.addEventListener('open', (event) => {
     console.log('WebSocket connection opened');
     socket.send(JSON.stringify({
         "message": "temp mssg",
-        "channel": "oblivion channel",
+        "channel": "test channel",
         "botId": "st-123",
         "type": "file"
     }));
@@ -21,7 +21,6 @@ socket.addEventListener('open', (event) => {
 
 //Listen for messages
 socket.addEventListener('message', (event) => {
-    //console.log(event);
     console.log('Message came');
     let receivedResponse = '';//JSON.parse(event.data);
     if (event.data instanceof Blob) {
@@ -30,15 +29,11 @@ socket.addEventListener('message', (event) => {
     else {
         receivedResponse = JSON.parse(event.data);
     }
-
     console.log('Received Response:', receivedResponse);
-
     if (receivedResponse.hasOwnProperty('isFile') || receivedResponse.hasOwnProperty('fileData')) {
         console.log('Received response file Data:', receivedResponse);
         showResults();
         const fileData = receivedResponse.fileData;
-        //const additionalData = receivedResponse.additionalData;
-        // Convert base64-encoded file data to a Blob
         console.log('File data:', fileData);
         fileDataReceived = fileData;
     }
@@ -71,24 +66,20 @@ socket.addEventListener('message', (event) => {
             initializeCurrentThread(currentChannel, currentBotId);
         }
         else if (receivedResponse.hasOwnProperty('message')) {
-            // = receivedResponse.message;
             console.log('Received message from server:', receivedResponse);
             const regex = /&quot;([^"]*)&quot;/g;
             if (regex.test(receivedResponse.message.val)) {
                 console.log('It was decoded');
                 const encodedString = receivedResponse.message.val;
                 const decodedString = encodedString.replace(/&quot;/g, '\"');
-                //console
                 receivedResponse.message.val = decodedString;
             }
             let receivedMessage = receivedResponse.message;
-            //if(receivedMessage !== '' && )
             if (receivedMessage !== '' && receivedResponse.message.type === 'text') {
                 console.log('Its not a template');
                 const threadState = getThreadState(receivedResponse.channel, receivedResponse.botId);
                 threadState.messages.push({ type: 'message received', content: receivedMessage.val, timestamp: getCurrentTimestamp() });
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
-                //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
             }
             else if (receivedMessage.val !== '' && receivedMessage.type === 'template') {
@@ -96,13 +87,10 @@ socket.addEventListener('message', (event) => {
                 console.log('It came here');
                 threadState.messages.push({ type: 'message received', content: JSON.stringify(receivedMessage), timestamp: getCurrentTimestamp() });
                 saveThread(receivedResponse.channel, receivedResponse.botId, threadState);
-                //displayReceivedMessage(receivedMessage.val);
                 initializeCurrentThread(currentChannel, currentBotId);
             }
-
         }
     }
-
 });
 
 // Connection closed
@@ -170,28 +158,6 @@ function createChannel() {
         "channel_name": params
     };
 
-    // var xhrGet = new XMLHttpRequest();
-    // var urlGet = "https://658175963dfdd1b11c435308.mockapi.io/channels";
-    // xhrGet.open("GET", urlGet, true);
-    // xhrGet.onreadystatechange = function () {
-    //     if (xhrGet.readyState == 4) {
-    //         if (xhrGet.status == 201) {
-    //             var existingChannels = JSON.parse(xhrGet.responseText.data);
-    //             var isObjectAlreadyExists = checkIfObjectExists(existingChannels, obj);
-    //             if (!isObjectAlreadyExists) {
-    //                 createNewChannel();
-    //             } else {
-    //                 alert("channel already exists!!!");
-    //                 params = "";
-    //                 closePopupChannel();
-    //             }
-    //         } else {
-    //             console.error("Error occurred while fetching existing channels");
-    //         }
-    //     }
-    // };
-    // xhrGet.send();
-
     var existingChannels = JSON.parse(localStorage.getItem('channels'));
     var isObjectAlreadyExists = checkIfObjectExists(existingChannels, obj);
     if (!isObjectAlreadyExists) {
@@ -237,17 +203,17 @@ function createNewChannel() {
 }
 
 function setChannels() {
-    var responseData = JSON.parse(localStorage.getItem('channels'));
-    var channelOptionsThreads = document.getElementById("channel-option");
+    let responseData = JSON.parse(localStorage.getItem('channels'));
+    let channelOptionsThreads = document.getElementById("channel-option");
     channelOptionsThreads.innerHTML = '';
-    var channelOptionsTestcase = document.getElementById("channel-testcase");
+    let channelOptionsTestcase = document.getElementById("channel-testcase");
     channelOptionsTestcase.innerHTML = '';
 
-    for (var currChannel = 0; currChannel < responseData.length; currChannel++) {
-        var channel = responseData[currChannel].channel_name;
+    for (let currChannel = 0; currChannel < responseData.length; currChannel++) {
+        let channel = responseData[currChannel].channel_name;
         channel = channel.toLowerCase();
-        var option = document.createElement("option");
-        var optionTestcase = document.createElement("option");
+        let option = document.createElement("option");
+        let optionTestcase = document.createElement("option");
         if (channel === 'apple') {
             option.value = 'amfb';
             optionTestcase.value = 'amfb';
@@ -265,8 +231,8 @@ function setChannels() {
 
 function getChannels() {
     if (!localStorage.getItem('channels')) {
-        var xhr = new XMLHttpRequest();
-        var url = "http://localhost:5005/api/v1/channels";//"https://658175963dfdd1b11c435308.mockapi.io/channels";
+        let xhr = new XMLHttpRequest();
+        let url = "http://localhost:5005/api/v1/channels";
         xhr.open("GET", url, true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
@@ -293,30 +259,17 @@ function getChannels() {
 function initializeThreads() {
     console.log(`for thread ${currentChannel}-${currentBotId}`);
     if (localStorage.getItem('threads')) {
-        // displaylistThreads();
         getThreads();
     }
     else {
-        // let url = "https://658175963dfdd1b11c435308.mockapi.io/channel_simulator";
-        // let xhttp = new XMLHttpRequest();
-        // xhttp.onreadystatechange = function () {
-        // if (this.readyState === 4 && this.status === 200) {
-
-        // localStorage.setItem('threads', this.responseText);
-        // displaylistThreads();
-        // }
-        // };
-        // xhttp.open("GET", url, true);
-        // xhttp.send();
         localStorage.setItem('threads', JSON.stringify([]));
-        // displaylistThreads();
         getThreads();
     }
 }
 
 
 function getThreads() {
-    var threads = JSON.parse(localStorage.getItem('threads'));
+    let threads = JSON.parse(localStorage.getItem('threads'));
     // console.log(threads);
     displaylistThreads(threads);
     //filterThreads(JSON.stringify(threads));
@@ -359,6 +312,7 @@ function displaylistThreads(threads) {
         threadItem.id = `${currentThread.bot_id}-${currentThread.channel}`;
         threadItem.onclick = () => initializeCurrentThread(currentThread.channel, currentThread.bot_id);
         threadItem.innerHTML = `
+            <div class='chat-icon'><img src='../chat-text.svg' style='width: 24px;'></div>
             <span class="thread-name">${currentThread.identity}-${currentThread.channel}</span><br>
           `;
         threadList.appendChild(threadItem);
@@ -389,13 +343,12 @@ function submitForm() {
             threads.push(threadDetails);
             console.log('Threads in local storage');
             console.log(threads);
-            //localStorage.removeItem('threads');
             localStorage.setItem('threads', JSON.stringify(threads));
             localStorage.setItem(`${botId}-${channel}`, JSON.stringify({ messages: [] }));
 
             document.getElementsByClassName('send-button').disabled = true;
             updateCurrentThreadDetails(channel, botId);
-            alert('Sucessfully added the thread');
+            alert('Successfully added the thread');
 
             let threadList = document.getElementById('thread-list');
 
@@ -405,6 +358,7 @@ function submitForm() {
             threadItem.onclick = () => initializeCurrentThread(channel, botId);
 
             threadItem.innerHTML = `
+            <div class='chat-icon'><img src='../chat-text.svg' style='width: 24px;'></div>
             <span class="thread-name">${identity}-${channel}</span><br>
             `;
             threadList.insertBefore(threadItem, threadList.firstChild);
@@ -424,10 +378,12 @@ function clearThreadForm() {
 }
 
 function sendMessage() {
-
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value;
-
+    if(!message){
+        alert('Please Enter a Message!');
+        return;
+    }
     const mssgType = document.getElementById('mssg-type').innerText;
     console.log(message);
     // Send the message over the WebSocket connection
@@ -437,20 +393,13 @@ function sendMessage() {
         "botId": currentBotId,
         "type": mssgType
     }));
-
-
     const threadState = getThreadState(currentChannel, currentBotId);
-
     threadState.messages.push({ type: 'message sent', content: message, timestamp: getCurrentTimestamp() });
-
     getPendingThreadDetails(currentChannel, currentBotId);
-
     saveThread(currentChannel, currentBotId, threadState);
-
     addMessage(message, getCurrentTimestamp());
     // Clear the input field
     messageInput.value = '';
-
 }
 
 function getCurrentTimestamp() {
@@ -470,59 +419,45 @@ function getCurrentTimestamp() {
 
 function addMessage(messageText, time) {
     //var messageInput = document.getElementById('messageInput');
-    var chatMessages = document.getElementById('chat-messages');
+    let chatMessages = document.getElementById('chat-messages');
 
     if (messageText !== '') {
-        var messageDiv = document.createElement('div');
+        let messageDiv = document.createElement('div');
         messageDiv.setAttribute('id', 'msg');
         messageDiv.classList.add('message', 'sent');
 
-        var timestamp = document.createElement('div');
+        let timestamp = document.createElement('div');
         timestamp.classList.add('timestamp');
         timestamp.innerText = time;
 
-        var messageContent = document.createElement('span');
+        let messageContent = document.createElement('span');
         messageContent.innerText = messageText;
         messageContent.appendChild(timestamp);
 
         messageDiv.appendChild(messageContent);
         chatMessages.appendChild(messageDiv);
 
-        //messageInput.value = '';
-
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     //sendMessage();
 }
 
-// function simulateReceivedMessage() {
-// setInterval(function () {
-// var receivedMessage = "Hello, this is a received message!Hello, this is a received message!This modification sets the background color for received messages to #fff to differentiate it from the container background. Feel free to adjust the colors as per your design preferences.This modification sets the background color for received messages to #fff to differentiate it from the container background. Feel free to adjust the colors as per your design preferences.This modification sets the background color for received messages to #fff to differentiate it from the container background. Feel free to adjust the colors as per your design preferences";
-// displayReceivedMessage(receivedMessage);
-// }, 3000);
-// }
-
 function displayReceivedMessage(messageText, time) {
-    var chatMessages = document.getElementById('chat-messages');
+    let chatMessages = document.getElementById('chat-messages');
 
-    var messageDiv = document.createElement('div');
+    let messageDiv = document.createElement('div');
     messageDiv.setAttribute('id', 'msg');
     messageDiv.classList.add('message', 'received');
 
-    var timestamp = document.createElement('div');
+    let timestamp = document.createElement('div');
     timestamp.classList.add('timestamp');
     timestamp.innerText = time;
 
-    var messageContent = document.createElement('span');
-
+    let messageContent = document.createElement('span');
     messageContent.innerText = messageText;
-    messageContent.appendChild(timestamp)
-
-
+    messageContent.appendChild(timestamp);
     messageDiv.appendChild(messageContent);
-
     chatMessages.appendChild(messageDiv);
-
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -541,7 +476,7 @@ document.getElementById('messageInput').addEventListener('keyup', function (even
 
 function initializeCurrentThread(channel, BotId) {
     console.log('Thread was clicked')
-    var chatMessages = document.getElementById('chat-messages');
+    let chatMessages = document.getElementById('chat-messages');
     chatMessages.innerText = ``;
     document.getElementsByClassName('send-button')[0].disabled = false;
     updateCurrentThreadDetails(channel, BotId);
@@ -650,24 +585,6 @@ function hideLoadingSpinner() {
     //showResults();
 }
 
-// function showResults(fileData) {
-//     //for test results popup
-//     console.log('Show results:', fileData);
-//     fileDataReceived = fileData;
-//     let results_display = document.createElement("div");
-//     results_display.id = "results-display";
-//     results_display.className = "results-display";
-//     results_display.innerHTML = `
-//     <div class="results-display" id="results-display">
-//     <span><button class="close-button" onclick="closeResults()">X</button></span>
-//     <span class="green-tick">&#x2705;</span>
-//     <span class="completion-text">Testing is Completed</span>
-//     <span><button id="download-button" onclick="downloadResults()">Download Results</button></span>
-//     </div>
-//     `;
-//     document.body.appendChild(results_display);
-// }
-
 function showResults() {
     //for test results popup
     const results_display = document.createElement("div");
@@ -702,15 +619,8 @@ function downloadResults() {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.id = 'download-link';
-
-    // Set the suggested filename based on additional key-value pairs
     link.download = `test_results.txt`;
-
-    // Trigger a click on the link to initiate the download
-
-
     link.click();
-
     closeResults();
     closeResults();
     // download.click();
@@ -722,6 +632,4 @@ window.onload = event => {
     currentBotId = '';
     initializeThreads();
     getChannels();
-
-
 }

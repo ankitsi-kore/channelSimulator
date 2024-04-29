@@ -82,7 +82,7 @@ function generatePayload(messageReceived, botId, mssgType, channel) {
         };
     }
     else if (channel === 'amfb') {
-        const apiUrl = `http://localhost/adapter/hooks/amfb/${botId}`;
+        const apiUrl = `${config.apiUrlAMFB}/${botId}`;;
 
         let reqObj;
 
